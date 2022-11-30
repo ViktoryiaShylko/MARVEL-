@@ -66,7 +66,19 @@ body {
     align-items: flex-end;
     font-size: 30px;
     line-height: 1;
+   /* transition: opacity 0.3s ease 0s; для варианта с ajax*/
 }
+
+/* -- для варианта с ajax
+.rating.rating_sending{
+    opacity: 0.2;
+}
+.rating.rating_set .rating__active,
+.rating.rsting_set .rating__item {
+    cursor: pointer;
+}*/
+
+
 .rating__body {
     position: relative;
 }
@@ -89,7 +101,7 @@ body {
     height: 100%;
     top: 0;
     left: 0;
-    color: gold;
+    color: yellow;
 }
 .rating__items {
     display: flex;
@@ -103,6 +115,7 @@ body {
     flex: 0 0 20%;
     height: 100%;
     opacity: 0;
+    cursor: pointer;
 }
 .rating__value {
     font-size: 80%;

@@ -1,3 +1,5 @@
+"use strict"
+
 let heroesJSON = `[{
     "name": "Бэтмен",
     "userName": "batman",
@@ -115,7 +117,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
                         <p class="card__text">Суперсилы: ${hero.superpower}</p>
                     </div>
                     <div class="form__item">
-                      <div class="rating">
+                      <div class="rating rating_set">
                        <div class="rating__body">
                           <div class="rating__active"></div>
                           <div class="rating__items">
@@ -126,12 +128,131 @@ document.addEventListener("DOMContentLoaded", function (event) {
                             <input type="radio" class="rating__item" id="star-1" name="rating" value="5">
                           </div>
                         </div>  
-                        <div class="rating__value">3.6</div>
+                        <div class="rating__value">1</div>
                       </div>
                     </div>
                 </div>`
+                 /* --- для работы с сервером добавить data-ajax="true" в строку <div data-ajax="true" class="rating rating_set">*/
             }
+
+           
+           
             document.querySelector('.card-container').innerHTML = heroesCards;
+
+
+            /*----работа с рейтингом---*/
+            const ratings = document.querySelectorAll('.rating');
+            if(ratings.length >0) {
+                initRatings();
+            }
+        
+            //основная функция
+            function initRatings() {
+                let ratingActive, ratingValue;
+                //бегаем по всем рейтингам на странице
+                for(let index = 0;index < ratings.length; index++){
+                    const rating = ratings[index];
+                    initRating(rating);
+                }
+        
+                //инициализируем конкретный рейтинг
+                function initRating(rating){
+                    initRatingVars(rating);
+        
+                    setRatingActiveWidth(); 
+
+                    if(rating.classList.contains('rating_set')) {
+                        setRating(rating);
+                    }
+                }
+        
+
+                //инициализация переменных
+                function initRatingVars(rating){
+                    ratingActive = rating.querySelector('.rating__active');
+                    ratingValue = rating.querySelector('.rating__value');
+                }
+        
+
+                //изменияем ширину активных звезд
+                function setRatingActiveWidth(index = ratingValue.innerHTML) {
+                    const ratingActiveWidth = index / 0.05;
+                    ratingActive.style.width = `${ratingActiveWidth}%`;
+                }
+
+
+                //возможность указать оценку
+                function setRating(rating) {
+                    const ratingItems = rating.querySelectorAll('.rating__item');
+                    for (let index = 0; index < ratingItems.length; index++) {
+                        const ratingItem = ratingItems[index];
+
+                        ratingItem.addEventListener("mouseenter", function(e) {
+                        
+                            //обновление переменных
+                            initRatingVars(rating);
+                            //обновление активных звезд
+                            setRatingActiveWidth(ratingItem.value);
+                        });
+                        ratingItem.addEventListener("mouseleave", function(e) {
+                            //обновление активных звезд
+                            setRatingActiveWidth();
+                        });
+                        ratingItem.addEventListener("click", function (e) {
+                            //обновление переменных
+                            initRatingVars(rating);
+
+                            // if сработает в варианте с сервером, сейчас работает вариант else
+                            if(rating.dataset.ajax) {
+                                //отправить на сервер
+                                setRatingValue(ratingItem.value, rating);
+                            } else {
+                                //отобразить указанную оценку
+                                ratingValue.innerHTML = index + 1;
+                                setRatingActiveWidth();
+                            }
+                        });
+                    }
+                }
+
+            /* ---- для работы с сервером -----
+            async function setRatingValue(value, rating) {
+                if(!rating.classList.contains('rating_sending')) {
+                    rating.classList.add('rating_sending');
+
+                    //отправка данных value на сервер
+                    let response = await fetch('rating.json', {
+                        method: 'GET', 
+
+                        //для работы с реальным сервером
+                        //body: JSON.stringify({
+                        //    userRating: value
+                        //}),
+                        //headers: {
+                        //    'content-type': 'application/json'
+                        //}
+                    });
+                    if(response.ok) {
+                        const result = await response.json();
+
+                        //получаем новый рейтинг
+                        const newRating = result.newRating;
+
+                        //вывод нового результата
+                        ratingValue.innerHTML = newRating;
+
+                        //обновление активных звезд
+                        rating.classList.remove('rating_sending');
+                    } else {
+                        alert("Ошибка");
+
+                        rating.classList.remove('rating_sending');
+                    }
+                }
+            }*/
+         
+                
+            }
+
     });
 
-    
