@@ -105,6 +105,7 @@ let heroesJSON = `[{
 document.addEventListener("DOMContentLoaded", function (event) {
     let heroes = JSON.parse(heroesJSON);
     let heroesCards = '';
+    let namesArr = [];
             for (let hero of heroes) {
                 heroesCards += `<div class="card">
                     <div class="card__name" id="${hero.userName}">${hero.name}</div>
@@ -132,12 +133,15 @@ document.addEventListener("DOMContentLoaded", function (event) {
                       </div>
                     </div>
                 </div>`
+
+                namesArr.push(hero.name);
                  /* --- для работы с сервером добавить data-ajax="true" в строку <div data-ajax="true" class="rating rating_set">*/
             }
 
            
-           
             document.querySelector('.card-container').innerHTML = heroesCards;
+           
+            console.log(namesArr);
 
 
             /*----работа с рейтингом---*/
@@ -149,16 +153,13 @@ document.addEventListener("DOMContentLoaded", function (event) {
             //основная функция
             function initRatings() {
                 let ratingActive, ratingValue;
+                let ratingArr = [];
                 //бегаем по всем рейтингам на странице
                 for(let index = 0;index < ratings.length; index++){
                     const rating = ratings[index];
-                    initRating(rating);
-                }
-        
-                //инициализируем конкретный рейтинг
-                function initRating(rating){
-                    initRatingVars(rating);
-        
+                    ratingActive = rating.querySelector('.rating__active');
+                    ratingValue = rating.querySelector('.rating__value');
+
                     setRatingActiveWidth(); 
 
                     if(rating.classList.contains('rating_set')) {
@@ -166,14 +167,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
                     }
                 }
         
-
-                //инициализация переменных
-                function initRatingVars(rating){
-                    ratingActive = rating.querySelector('.rating__active');
-                    ratingValue = rating.querySelector('.rating__value');
-                }
-        
-
                 //изменияем ширину активных звезд
                 function setRatingActiveWidth(index = ratingValue.innerHTML) {
                     const ratingActiveWidth = index / 0.05;
@@ -184,75 +177,26 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 //возможность указать оценку
                 function setRating(rating) {
                     const ratingItems = rating.querySelectorAll('.rating__item');
+               
                     for (let index = 0; index < ratingItems.length; index++) {
                         const ratingItem = ratingItems[index];
 
-                        ratingItem.addEventListener("mouseenter", function(e) {
-                        
-                            //обновление переменных
-                            initRatingVars(rating);
-                            //обновление активных звезд
-                            setRatingActiveWidth(ratingItem.value);
-                        });
-                        ratingItem.addEventListener("mouseleave", function(e) {
-                            //обновление активных звезд
-                            setRatingActiveWidth();
-                        });
                         ratingItem.addEventListener("click", function (e) {
                             //обновление переменных
-                            initRatingVars(rating);
+                            ratingActive = rating.querySelector('.rating__active');
+                            ratingValue = rating.querySelector('.rating__value');
 
-                            // if сработает в варианте с сервером, сейчас работает вариант else
-                            if(rating.dataset.ajax) {
-                                //отправить на сервер
-                                setRatingValue(ratingItem.value, rating);
-                            } else {
-                                //отобразить указанную оценку
-                                ratingValue.innerHTML = index + 1;
-                                setRatingActiveWidth();
-                            }
+                            //отобразить указанную оценку
+                            ratingValue.innerHTML = index + 1;
+                            setRatingActiveWidth();
+                            
+                            //заполняем массив рейтингом
+                            ratingArr.push(ratingItem.value);
+                            console.log(ratingArr);
                         });
+
                     }
-                }
-
-            /* ---- для работы с сервером -----
-            async function setRatingValue(value, rating) {
-                if(!rating.classList.contains('rating_sending')) {
-                    rating.classList.add('rating_sending');
-
-                    //отправка данных value на сервер
-                    let response = await fetch('rating.json', {
-                        method: 'GET', 
-
-                        //для работы с реальным сервером
-                        //body: JSON.stringify({
-                        //    userRating: value
-                        //}),
-                        //headers: {
-                        //    'content-type': 'application/json'
-                        //}
-                    });
-                    if(response.ok) {
-                        const result = await response.json();
-
-                        //получаем новый рейтинг
-                        const newRating = result.newRating;
-
-                        //вывод нового результата
-                        ratingValue.innerHTML = newRating;
-
-                        //обновление активных звезд
-                        rating.classList.remove('rating_sending');
-                    } else {
-                        alert("Ошибка");
-
-                        rating.classList.remove('rating_sending');
-                    }
-                }
-            }*/
-         
-                
+                }  
             }
-
     });
 
